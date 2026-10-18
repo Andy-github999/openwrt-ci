@@ -7,3 +7,13 @@ rm -rf package/passwall-packages
 rm -rf package/luci-app-passwall2
 git clone https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
 git clone https://github.com/Openwrt-Passwall/openwrt-passwall2 package/luci-app-passwall2
+
+# 应用 LibWrt 仓库自带的 feeds-overrides，把 packages feed 的 Go 默认版本升到 1.27。
+# 原因：xray-core 26.9.30 的 go.mod 声明 go >= 1.27，而上游 immortalwrt/packages
+# 的 GO_DEFAULT_VERSION 还是 1.26，直接编会失败。
+# 注意顺序：feeds 已由 workflow 的 "Install Feeds" 步骤 update 过，这里补丁 + install 即可，
+# 这样新增的 golang1.27 才会被链接进 package/ 并被 make 识别。
+if [ -x ./feeds-overrides/apply.sh ]; then
+  ./feeds-overrides/apply.sh
+  ./scripts/feeds install -a
+fi
